@@ -19,5 +19,3 @@ test:
   stage: checks
   script:
     - gradle test
-    - bash extract_coverage.sh
-  coverage: '/\d+%/'
