@@ -3,9 +3,9 @@ package unsw.utils;
 /**
  * Represents some generic methods to handle most of the complicated
  * math for you.
- * 
+ *
  * You shouldn't modify this file.
- * 
+ *
  * @author Braedon Wooding
  */
 public final class MathsHelper {
@@ -20,11 +20,11 @@ public final class MathsHelper {
     public static double getDistance(double satelliteHeight, Angle satelliteAngle, double otherHeight,
             Angle otherAngle) {
         // convert to euclidean
-        double satX = Math.cos(satelliteAngle.toRadians()) * satelliteHeight,
-                satY = Math.sin(satelliteAngle.toRadians()) * satelliteHeight;
-        double otherX = Math.cos(otherAngle.toRadians()) * otherHeight,
-                otherY = Math.sin(otherAngle.toRadians()) * otherHeight;
+        double satX = Math.cos(satelliteAngle.toRadians()) * satelliteHeight;
+        double satY = Math.sin(satelliteAngle.toRadians()) * satelliteHeight;
+        double otherX = Math.cos(otherAngle.toRadians()) * otherHeight;
 
+        double otherY = Math.sin(otherAngle.toRadians()) * otherHeight;
         // find length of line between euclidean points
         double length = Math.sqrt((satX - otherX) * (satX - otherX) + (satY - otherY) * (satY - otherY));
         return length;
@@ -50,11 +50,10 @@ public final class MathsHelper {
     public static boolean isVisible(double satelliteHeight, Angle satelliteAngle, double otherHeight,
             Angle otherAngle) {
         // convert to euclidean
-        double satX = Math.cos(satelliteAngle.toRadians()) * satelliteHeight,
-                satY = Math.sin(satelliteAngle.toRadians()) * satelliteHeight;
-        double otherX = Math.cos(otherAngle.toRadians()) * otherHeight,
-                otherY = Math.sin(otherAngle.toRadians()) * otherHeight;
-        
+        double satX = Math.cos(satelliteAngle.toRadians()) * satelliteHeight;
+        double satY = Math.sin(satelliteAngle.toRadians()) * satelliteHeight;
+        double otherX = Math.cos(otherAngle.toRadians()) * otherHeight;
+
         // now is the *fun* part since we have to determine visibility to other
         // satellites this is much more complicated
         // (if it's just to things that always lie on the circle it's just dist <
@@ -66,20 +65,20 @@ public final class MathsHelper {
          * - Let A = (ax, ay), B = (bx, by) be the points on our line segment
          * - Our cicle C is presumed to be (0, 0) (i.e. centred)
          * - Giving us points of x + y = RADIUS_OF_JUPITER^2
-         * 
+         *
          * We can then interpolate over the reals for t \in [0, 1] stating that
          * all points on the line must be A + t(B - A).
-         * 
+         *
          * Points of intersection must satisfy both points at the same time.
          * that is splitting the equations into components and then placing the
          * result into the circle equation.
-         * 
+         *
          * x = ax + t(bx - ax)
          * y = ay + t(by - ay)
-         * 
+         *
          * (placing result into circle equation)
          * (ax + t(bx - ax))^2 + (ay + t(by - ay))^2 = RADIUS_OF_JUPITER^2
-         * 
+         *
          * expanding...
          * t^2[(bx - ax)^2 + (by - ay)^2] + 2t[ax(bx - ax) + ay(by - ay)] + (ax^2 + ay^2
          * - RADIUS_OF_JUPITER^2) = 0
@@ -88,20 +87,23 @@ public final class MathsHelper {
          * 'over the *REALS* for t \in [0, 1]'. That is we can determine that indeed t
          * is real
          * and then after that validate it is within [0, 1].
-         * 
+         *
          * Determinant is b^2 - 4ac, and to ensure t is real this just has to be
          * positive.
-         * 
+         *
          */
 
-        double ax = satX, ay = satY;
-        double bx = otherX, by = otherY;
+        double otherY = Math.sin(otherAngle.toRadians()) * otherHeight;
+        double ax = satX;
+        double ay = satY;
+        double bx = otherX;
+        double by = otherY;
         // t^2 component == (bx - ax)^2 + (by - ay)^2
         double a = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
 
         // t component == 2[ax(bx - ax) + ay(by - ay)]
         double b = 2 * (ax * (bx - ax) + ay * (by - ay));
-        
+
         /*
          * Note for 2022T3: the above explanation works, the only problem is how discriminant is calculated
          * I have linked a better explanation for the discriminant calculation and it seems to resolve the issue we had
@@ -109,7 +111,7 @@ public final class MathsHelper {
         // method explanation can be found here:
         // https://mathworld.wolfram.com/Circle-LineIntersection.html
         // discriminant = RADIUS_OF_JUPITER^2*dr^2 - D^2
-        double det = RADIUS_OF_JUPITER*RADIUS_OF_JUPITER*(a) - (ax*by-bx*ay)*(ax*by-bx*ay);
+        double det = RADIUS_OF_JUPITER * RADIUS_OF_JUPITER * (a) - (ax * by - bx * ay) * (ax * by - bx * ay);
         if (det <= 0)
             return true;
         // calculate 2 possible t's
@@ -122,6 +124,5 @@ public final class MathsHelper {
         // in our specific case we are going to only allow t \in [0, 1]
         // because we are okay with it being the tangent, just not going *through*
         return !((0 <= tPos && tPos <= 1) || (0 <= tNeg && tNeg <= 1));
-
     }
 }
