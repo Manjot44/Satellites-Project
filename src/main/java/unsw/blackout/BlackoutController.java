@@ -7,13 +7,17 @@ import unsw.response.models.EntityInfoResponse;
 import unsw.utils.Angle;
 
 public class BlackoutController {
+    private List<Device> devices = new ArrayList<Device>();
+    private List<Satellite> satellites = new ArrayList<Satellite>();
 
     public void createDevice(String deviceId, String type, Angle position) {
-        // TODO: Task 1a)
+        if (type == "HandheldDevice") devices.add(new HandheldDevice(deviceId, position));
+        if (type == "LaptopDevice") devices.add(new LaptopDevice(deviceId, position));
+        if (type == "DesktopDevice") devices.add(new DesktopDevice(deviceId, position));
     }
 
     public void removeDevice(String deviceId) {
-        // TODO: Task 1b)
+        devices.removeIf(x -> (x.getDeviceId() == deviceId));
     }
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
