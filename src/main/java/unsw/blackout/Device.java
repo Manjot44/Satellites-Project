@@ -10,10 +10,12 @@ public abstract class Device {
     private String deviceId;
     private Angle position;
     private int range;
+    private String type;
 
-    public Device(String deviceId, Angle position) {
+    public Device(String deviceId, Angle position, String type) {
         this.deviceId = deviceId;
         this.position = position;
+        this.type = type;
     }
 
     public void addFile(String filename, String content) {
@@ -35,6 +37,10 @@ public abstract class Device {
 
     public int getRange() {
         return range;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public abstract void setRange(int range);

@@ -8,7 +8,7 @@ public class File {
     public File(String filename, String content) {
         this.filename = filename;
         this.content = content;
-        this.hasTransferCompleted = false;
+        this.hasTransferCompleted = true;
     }
 
     public String getFilename() {

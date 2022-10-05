@@ -14,9 +14,9 @@ public class BlackoutController {
     private Map<String, Satellite> satellites = new HashMap<String, Satellite>();
 
     public void createDevice(String deviceId, String type, Angle position) {
-        if (type == "HandheldDevice") devices.put(deviceId, new HandheldDevice(deviceId, position));
-        if (type == "LaptopDevice") devices.put(deviceId, new LaptopDevice(deviceId, position));
-        if (type == "DesktopDevice") devices.put(deviceId, new DesktopDevice(deviceId, position));
+        if (type == "HandheldDevice") devices.put(deviceId, new HandheldDevice(deviceId, position, type));
+        if (type == "LaptopDevice") devices.put(deviceId, new LaptopDevice(deviceId, position, type));
+        if (type == "DesktopDevice") devices.put(deviceId, new DesktopDevice(deviceId, position, type));
     }
 
     public void removeDevice(String deviceId) {
@@ -25,13 +25,13 @@ public class BlackoutController {
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
         if (type == "StandardSatellite") {
-            satellites.put(satelliteId, new StandardSatellite(satelliteId, height, position));
+            satellites.put(satelliteId, new StandardSatellite(satelliteId, height, position, type));
         }
         if (type == "TeleportingSatellite") {
-            satellites.put(satelliteId, new TeleportingSatellite(satelliteId, height, position));
+            satellites.put(satelliteId, new TeleportingSatellite(satelliteId, height, position, type));
         }
         if (type == "RelaySatellite") {
-            satellites.put(satelliteId, new RelaySatellite(satelliteId, height, position));
+            satellites.put(satelliteId, new RelaySatellite(satelliteId, height, position, type));
         }
     }
 
@@ -63,14 +63,13 @@ public class BlackoutController {
         if (device != null) {
             position = device.getPosition();
             height = 69911;
-            type = device.getClass().toString();
+            type = device.getType();
             filesMap = device.getFiles();
-
         } else {
             Satellite satellite = satellites.get(id);
             position = satellite.getPosition();
             height = satellite.getHeight();
-            type = satellite.getClass().toString();
+            type = satellite.getType();
             filesMap = satellite.getFiles();
         }
 

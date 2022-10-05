@@ -4,8 +4,8 @@ import unsw.utils.Angle;
 
 public class TeleportingSatellite extends Satellite {
 
-    public TeleportingSatellite(String satelliteId, double height, Angle position) {
-        super(satelliteId, height, position);
+    public TeleportingSatellite(String satelliteId, double height, Angle position, String type) {
+        super(satelliteId, height, position, type);
         setRange(getRange());
         setSpeed(getSpeed());
     }

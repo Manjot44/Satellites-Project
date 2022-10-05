@@ -12,11 +12,13 @@ public abstract class Satellite {
     private Angle position;
     private int speed;
     private int range;
+    private String type;
 
-    public Satellite(String satelliteId, double height, Angle position) {
+    public Satellite(String satelliteId, double height, Angle position, String type) {
         this.satelliteId = satelliteId;
         this.height = height;
         this.position = position;
+        this.type = type;
     }
 
     public void addFile(String filename, String content) {
@@ -46,6 +48,10 @@ public abstract class Satellite {
 
     public int getRange() {
         return range;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public abstract void setSpeed(int speed);

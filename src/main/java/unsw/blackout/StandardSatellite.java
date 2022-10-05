@@ -4,8 +4,8 @@ import unsw.utils.Angle;
 
 public class StandardSatellite extends Satellite {
 
-    public StandardSatellite(String satelliteId, double height, Angle position) {
-        super(satelliteId, height, position);
+    public StandardSatellite(String satelliteId, double height, Angle position, String type) {
+        super(satelliteId, height, position, type);
         setRange(getRange());
         setSpeed(getSpeed());
     }
