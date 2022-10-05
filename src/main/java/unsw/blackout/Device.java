@@ -10,6 +10,7 @@ public abstract class Device {
     private String deviceId;
     private Angle position;
     private int range;
+
     private String type;
 
     public Device(String deviceId, Angle position, String type) {
@@ -19,7 +20,8 @@ public abstract class Device {
     }
 
     public void addFile(String filename, String content) {
-        File file = new File(filename, content);
+        boolean hasTransferCompleted = true;
+        File file = new File(filename, content, hasTransferCompleted);
         files.put(filename, file);
     }
 
@@ -43,5 +45,7 @@ public abstract class Device {
         return type;
     }
 
-    public abstract void setRange(int range);
+    public void setRange(int range) {
+        this.range = range;
+    }
 }

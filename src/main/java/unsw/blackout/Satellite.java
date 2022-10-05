@@ -13,16 +13,20 @@ public abstract class Satellite {
     private int speed;
     private int range;
     private String type;
+    private boolean isClockwise;
 
     public Satellite(String satelliteId, double height, Angle position, String type) {
         this.satelliteId = satelliteId;
         this.height = height;
         this.position = position;
         this.type = type;
+        this.isClockwise = true;
     }
 
+    ///////////////////////////////////// edit this function ////////////////////////////////////////////////////
     public void addFile(String filename, String content) {
-        File file = new File(filename, content);
+        boolean hasTransferCompleted = false;
+        File file = new File(filename, content, hasTransferCompleted);
         files.put(filename, file);
     }
 
@@ -54,7 +58,26 @@ public abstract class Satellite {
         return type;
     }
 
-    public abstract void setSpeed(int speed);
+    public boolean getClockwise() {
+        return isClockwise;
+    }
 
-    public abstract void setRange(int range);
+    public void setPosition(Angle position) {
+        this.position = position;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public void setRange(int range) {
+        this.range = range;
+    }
+
+    public void setClockwise(boolean isClockwise) {
+        this.isClockwise = isClockwise;
+    }
+
+    public abstract boolean checkDirection();
+    public abstract void move();
 }

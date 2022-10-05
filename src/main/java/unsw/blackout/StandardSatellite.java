@@ -3,20 +3,33 @@ package unsw.blackout;
 import unsw.utils.Angle;
 
 public class StandardSatellite extends Satellite {
+    public static final int STANDARD_RANGE = 150_000;
+    public static final int STANDARD_SPEED = 2_500;
 
     public StandardSatellite(String satelliteId, double height, Angle position, String type) {
         super(satelliteId, height, position, type);
-        setRange(getRange());
-        setSpeed(getSpeed());
+        setRange(STANDARD_RANGE);
+        setSpeed(STANDARD_SPEED);
+        setClockwise(checkDirection());
     }
 
     @Override
-    public void setRange(int range) {
-        range = 150000;
+    public boolean checkDirection() {
+        return true;
     }
 
     @Override
-    public void setSpeed(int speed) {
-        speed = 2500;
+    public void move() {
+        Angle position = getPosition();
+
+        double angularVelocity = getSpeed() / getHeight();
+        Angle radiansMoved = Angle.fromRadians(angularVelocity);
+        setPosition(position.subtract(radiansMoved));
+
+        Angle zeroAngle = Angle.fromDegrees(0);
+        if (position.compareTo(zeroAngle) == -1) {
+            Angle fullAngle = Angle.fromDegrees(360);
+            setPosition(position.add(fullAngle));
+        }
     }
 }

@@ -5,10 +5,10 @@ public class File {
     private String content;
     private boolean hasTransferCompleted;
 
-    public File(String filename, String content) {
+    public File(String filename, String content, boolean hasTransferCompleted) {
         this.filename = filename;
         this.content = content;
-        this.hasTransferCompleted = true;
+        this.hasTransferCompleted = hasTransferCompleted;
     }
 
     public String getFilename() {

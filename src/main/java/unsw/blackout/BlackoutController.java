@@ -8,6 +8,7 @@ import java.util.Map;
 import unsw.response.models.EntityInfoResponse;
 import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
+import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
 public class BlackoutController {
     private Map<String, Device> devices = new HashMap<String, Device>();
@@ -62,7 +63,7 @@ public class BlackoutController {
 
         if (device != null) {
             position = device.getPosition();
-            height = 69911;
+            height = RADIUS_OF_JUPITER;
             type = device.getType();
             filesMap = device.getFiles();
         } else {
@@ -88,7 +89,9 @@ public class BlackoutController {
     }
 
     public void simulate() {
-        // TODO: Task 2a)
+        for (Satellite satellite : satellites.values()) {
+            satellite.move();
+        }
     }
 
     /**
