@@ -1,50 +1,91 @@
 package unsw.blackout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import unsw.response.models.EntityInfoResponse;
+import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
 
 public class BlackoutController {
-    private List<Device> devices = new ArrayList<Device>();
-    private List<Satellite> satellites = new ArrayList<Satellite>();
+    private Map<String, Device> devices = new HashMap<String, Device>();
+    private Map<String, Satellite> satellites = new HashMap<String, Satellite>();
 
     public void createDevice(String deviceId, String type, Angle position) {
-        if (type == "HandheldDevice") devices.add(new HandheldDevice(deviceId, position));
-        if (type == "LaptopDevice") devices.add(new LaptopDevice(deviceId, position));
-        if (type == "DesktopDevice") devices.add(new DesktopDevice(deviceId, position));
+        if (type == "HandheldDevice") devices.put(deviceId, new HandheldDevice(deviceId, position));
+        if (type == "LaptopDevice") devices.put(deviceId, new LaptopDevice(deviceId, position));
+        if (type == "DesktopDevice") devices.put(deviceId, new DesktopDevice(deviceId, position));
     }
 
     public void removeDevice(String deviceId) {
-        devices.removeIf(x -> (x.getDeviceId() == deviceId));
+        devices.remove(deviceId);
     }
 
     public void createSatellite(String satelliteId, String type, double height, Angle position) {
-        // TODO: Task 1c)
+        if (type == "StandardSatellite") {
+            satellites.put(satelliteId, new StandardSatellite(satelliteId, height, position));
+        }
+        if (type == "TeleportingSatellite") {
+            satellites.put(satelliteId, new TeleportingSatellite(satelliteId, height, position));
+        }
+        if (type == "RelaySatellite") {
+            satellites.put(satelliteId, new RelaySatellite(satelliteId, height, position));
+        }
     }
 
     public void removeSatellite(String satelliteId) {
-        // TODO: Task 1d)
+        satellites.remove(satelliteId);
     }
 
     public List<String> listDeviceIds() {
-        // TODO: Task 1e)
-        return new ArrayList<>();
+        return new ArrayList<String>(devices.keySet());
     }
 
     public List<String> listSatelliteIds() {
-        // TODO: Task 1f)
-        return new ArrayList<>();
+        return new ArrayList<String>(satellites.keySet());
     }
 
     public void addFileToDevice(String deviceId, String filename, String content) {
-        // TODO: Task 1g)
+        Device device = devices.get(deviceId);
+        device.addFile(filename, content);
     }
 
     public EntityInfoResponse getInfo(String id) {
-        // TODO: Task 1h)
-        return null;
+        Angle position;
+        double height;
+        String type;
+        Map<String, File> filesMap;
+
+        Device device = devices.get(id);
+
+        if (device != null) {
+            position = device.getPosition();
+            height = 69911;
+            type = device.getClass().toString();
+            filesMap = device.getFiles();
+
+        } else {
+            Satellite satellite = satellites.get(id);
+            position = satellite.getPosition();
+            height = satellite.getHeight();
+            type = satellite.getClass().toString();
+            filesMap = satellite.getFiles();
+        }
+
+        List<String> filenames = new ArrayList<String>(filesMap.keySet());
+        List<File> files = new ArrayList<File>(filesMap.values());
+        Map<String, FileInfoResponse> fileResponse = new HashMap<String, FileInfoResponse>();
+
+        for (int i = 0; i < files.size(); i++) {
+            fileResponse.put(filenames.get(i), new FileInfoResponse(files.get(i).getFilename(),
+                                                                    files.get(i).getContent(),
+                                                                    files.get(i).getContent().length(),
+                                                                    files.get(i).isHasTransferCompleted()));
+        }
+
+        return new EntityInfoResponse(id, position, height, type, fileResponse);
     }
 
     public void simulate() {
