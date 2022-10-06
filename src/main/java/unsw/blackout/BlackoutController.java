@@ -93,10 +93,18 @@ public class BlackoutController {
         boolean isSenderDevice;
         if (devices.containsKey(id)) {
             isSenderDevice = true;
-            return new ArrayList<String>(CommsHelper.addRecursive(this, id, isSenderDevice));
+            List<String> inRange = new ArrayList<String>(CommsHelper.addRecursive(this, id, isSenderDevice));
+            if (devices.get(id).getType() == "DesktopDevice") {
+                inRange.removeIf(x -> satellites.get(x) != null && satellites.get(x).getType() == "StandardSatellite");
+            }
+            return inRange;
         } else {
             isSenderDevice = false;
-            return new ArrayList<String>(CommsHelper.addRecursive(this, id, isSenderDevice));
+            List<String> inRange = new ArrayList<String>(CommsHelper.addRecursive(this, id, isSenderDevice));
+            if (satellites.get(id).getType() == "StandardSatellite") {
+                inRange.removeIf(x -> (devices.get(x) != null) && (devices.get(x).getType() == "DesktopDevice"));
+            }
+            return inRange;
         }
     }
 
