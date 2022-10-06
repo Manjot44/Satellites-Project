@@ -20,7 +20,7 @@ public class File {
     }
 
     public int getSize() {
-        return getContent().length();
+        return content.length();
     }
 
     public boolean isHasTransferCompleted() {

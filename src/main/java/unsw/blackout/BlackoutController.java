@@ -7,11 +7,20 @@ import java.util.Map;
 
 import unsw.response.models.EntityInfoResponse;
 import unsw.utils.Angle;
+import unsw.utils.CommsHelper;
+
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
 public class BlackoutController {
     private Map<String, Device> devices = new HashMap<String, Device>();
     private Map<String, Satellite> satellites = new HashMap<String, Satellite>();
+
+    public Map<String, Satellite> getSatellites() {
+        return satellites;
+    }
+    public Map<String, Device> getDevices() {
+        return devices;
+    }
 
     public void createDevice(String deviceId, String type, Angle position) {
         if (type == "HandheldDevice") devices.put(deviceId, new HandheldDevice(deviceId, position, type));
@@ -53,7 +62,7 @@ public class BlackoutController {
     }
 
     public EntityInfoResponse getInfo(String id) {
-        if (devices.get(id) != null) {
+        if (devices.containsKey(id)) {
             Device device = devices.get(id);
             return new EntityInfoResponse(id, device.getPosition(), RADIUS_OF_JUPITER, device.getType(),
                                           device.generateFileResponse());
@@ -81,8 +90,14 @@ public class BlackoutController {
     }
 
     public List<String> communicableEntitiesInRange(String id) {
-        // TODO: Task 2 b)
-        return new ArrayList<>();
+        boolean isSenderDevice;
+        if (devices.containsKey(id)) {
+            isSenderDevice = true;
+            return new ArrayList<String>(CommsHelper.addRecursive(this, id, isSenderDevice));
+        } else {
+            isSenderDevice = false;
+            return new ArrayList<String>(CommsHelper.addRecursive(this, id, isSenderDevice));
+        }
     }
 
     public void sendFile(String fileName, String fromId, String toId) throws FileTransferException {
