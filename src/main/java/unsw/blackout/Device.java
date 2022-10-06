@@ -3,6 +3,7 @@ package unsw.blackout;
 import java.util.HashMap;
 import java.util.Map;
 
+import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
 
 public abstract class Device {
@@ -13,9 +14,10 @@ public abstract class Device {
 
     private String type;
 
-    public Device(String deviceId, Angle position, String type) {
+    public Device(String deviceId, Angle position, int range, String type) {
         this.deviceId = deviceId;
         this.position = position;
+        this.range = range;
         this.type = type;
     }
 
@@ -23,6 +25,15 @@ public abstract class Device {
         boolean hasTransferCompleted = true;
         File file = new File(filename, content, hasTransferCompleted);
         files.put(filename, file);
+    }
+
+    public Map<String, FileInfoResponse> generateFileResponse() {
+        Map<String, FileInfoResponse> fileResponse = new HashMap<String, FileInfoResponse>();
+        for (File file : files.values()) {
+            fileResponse.put(file.getFilename(), new FileInfoResponse(file.getFilename(), file.getContent(),
+                                                                      file.getSize(), file.isHasTransferCompleted()));
+        }
+        return fileResponse;
     }
 
     public Map<String, File> getFiles() {

@@ -7,9 +7,7 @@ public class TeleportingSatellite extends Satellite {
     public static final int TELEPORTING_SPEED = 1_000;
 
     public TeleportingSatellite(String satelliteId, double height, Angle position, String type) {
-        super(satelliteId, height, position, type);
-        setRange(TELEPORTING_RANGE);
-        setSpeed(TELEPORTING_SPEED);
+        super(satelliteId, height, TELEPORTING_RANGE, TELEPORTING_SPEED, position, type);
         setClockwise(checkDirection());
     }
 

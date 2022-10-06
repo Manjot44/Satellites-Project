@@ -3,6 +3,7 @@ package unsw.blackout;
 import java.util.HashMap;
 import java.util.Map;
 
+import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
 
 public abstract class Satellite {
@@ -15,19 +16,23 @@ public abstract class Satellite {
     private String type;
     private boolean isClockwise;
 
-    public Satellite(String satelliteId, double height, Angle position, String type) {
+    public Satellite(String satelliteId, double height, int range, int speed, Angle position, String type) {
         this.satelliteId = satelliteId;
         this.height = height;
         this.position = position;
+        this.speed = speed;
+        this.range = range;
         this.type = type;
         this.isClockwise = true;
     }
 
-    ///////////////////////////////////// edit this function ////////////////////////////////////////////////////
-    public void addFile(String filename, String content) {
-        boolean hasTransferCompleted = false;
-        File file = new File(filename, content, hasTransferCompleted);
-        files.put(filename, file);
+    public Map<String, FileInfoResponse> generateFileResponse() {
+        Map<String, FileInfoResponse> fileResponse = new HashMap<String, FileInfoResponse>();
+        for (File file : files.values()) {
+            fileResponse.put(file.getFilename(), new FileInfoResponse(file.getFilename(), file.getContent(),
+                                                                      file.getSize(), file.isHasTransferCompleted()));
+        }
+        return fileResponse;
     }
 
     public Map<String, File> getFiles() {

@@ -7,9 +7,7 @@ public class StandardSatellite extends Satellite {
     public static final int STANDARD_SPEED = 2_500;
 
     public StandardSatellite(String satelliteId, double height, Angle position, String type) {
-        super(satelliteId, height, position, type);
-        setRange(STANDARD_RANGE);
-        setSpeed(STANDARD_SPEED);
+        super(satelliteId, height, STANDARD_RANGE, STANDARD_SPEED, position, type);
         setClockwise(checkDirection());
     }
 

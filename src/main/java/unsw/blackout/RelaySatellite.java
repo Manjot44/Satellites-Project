@@ -7,9 +7,7 @@ public class RelaySatellite extends Satellite {
     public static final int RELAY_SPEED = 1_500;
 
     public RelaySatellite(String satelliteId, double height, Angle position, String type) {
-        super(satelliteId, height, position, type);
-        setRange(RELAY_RANGE);
-        setSpeed(RELAY_SPEED);
+        super(satelliteId, height, RELAY_RANGE, RELAY_SPEED, position, type);
         setClockwise(checkDirection());
     }
 

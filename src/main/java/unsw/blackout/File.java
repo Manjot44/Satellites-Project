@@ -19,6 +19,10 @@ public class File {
         return content;
     }
 
+    public int getSize() {
+        return getContent().length();
+    }
+
     public boolean isHasTransferCompleted() {
         return hasTransferCompleted;
     }

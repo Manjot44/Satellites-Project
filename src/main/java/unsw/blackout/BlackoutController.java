@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import unsw.response.models.EntityInfoResponse;
-import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
@@ -54,38 +53,15 @@ public class BlackoutController {
     }
 
     public EntityInfoResponse getInfo(String id) {
-        Angle position;
-        double height;
-        String type;
-        Map<String, File> filesMap;
-
-        Device device = devices.get(id);
-
-        if (device != null) {
-            position = device.getPosition();
-            height = RADIUS_OF_JUPITER;
-            type = device.getType();
-            filesMap = device.getFiles();
+        if (devices.get(id) != null) {
+            Device device = devices.get(id);
+            return new EntityInfoResponse(id, device.getPosition(), RADIUS_OF_JUPITER, device.getType(),
+                                          device.generateFileResponse());
         } else {
             Satellite satellite = satellites.get(id);
-            position = satellite.getPosition();
-            height = satellite.getHeight();
-            type = satellite.getType();
-            filesMap = satellite.getFiles();
+            return new EntityInfoResponse(id, satellite.getPosition(), satellite.getHeight(), satellite.getType(),
+                                          satellite.generateFileResponse());
         }
-
-        List<String> filenames = new ArrayList<String>(filesMap.keySet());
-        List<File> files = new ArrayList<File>(filesMap.values());
-        Map<String, FileInfoResponse> fileResponse = new HashMap<String, FileInfoResponse>();
-
-        for (int i = 0; i < files.size(); i++) {
-            fileResponse.put(filenames.get(i), new FileInfoResponse(files.get(i).getFilename(),
-                                                                    files.get(i).getContent(),
-                                                                    files.get(i).getContent().length(),
-                                                                    files.get(i).isHasTransferCompleted()));
-        }
-
-        return new EntityInfoResponse(id, position, height, type, fileResponse);
     }
 
     public void simulate() {
