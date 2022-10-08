@@ -5,9 +5,14 @@ import unsw.utils.Angle;
 public class RelaySatellite extends Satellite {
     public static final int RELAY_RANGE = 300_000;
     public static final int RELAY_SPEED = 1_500;
+    public static final int RELAY_SEND = -1;
+    public static final int RELAY_RECEIVE = -1;
+    public static final int RELAY_FILE_STORAGE = 0;
+    public static final int RELAY_BYTE_STORAGE = 0;
 
     public RelaySatellite(String satelliteId, double height, Angle position, String type) {
-        super(satelliteId, height, RELAY_RANGE, RELAY_SPEED, position, type);
+        super(satelliteId, height, RELAY_RANGE, RELAY_SPEED, position, type, RELAY_SEND, RELAY_RECEIVE,
+              RELAY_FILE_STORAGE, RELAY_BYTE_STORAGE);
         setClockwise(checkDirection());
     }
 

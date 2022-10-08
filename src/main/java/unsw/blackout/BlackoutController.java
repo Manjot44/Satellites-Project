@@ -76,6 +76,17 @@ public class BlackoutController {
     public void simulate() {
         for (Satellite satellite : satellites.values()) {
             satellite.move();
+
+            if (satellite.getType() == "TeleportingSatellite") {
+                TeleportingSatellite teleSat = (TeleportingSatellite) satellite;
+                if (teleSat.isTeleported()) {
+                    teleSat.teleTransfer(this);
+                }
+            }
+            satellite.transfer(this);
+        }
+        for (Device device : devices.values()) {
+            device.transfer(this);
         }
     }
 
@@ -110,7 +121,13 @@ public class BlackoutController {
     }
 
     public void sendFile(String fileName, String fromId, String toId) throws FileTransferException {
-        // TODO: Task 2 c)
+        if (devices.containsKey(fromId)) {
+            CommsHelper.devToSatSend(fileName, devices.get(fromId), satellites.get(toId));
+        } else if (devices.containsKey(toId)) {
+            CommsHelper.satToDevSend(fileName, satellites.get(fromId), devices.get(toId));
+        } else {
+            CommsHelper.satToSatSend(fileName, satellites.get(fromId), satellites.get(toId));
+        }
     }
 
     public void createDevice(String deviceId, String type, Angle position, boolean isMoving) {
