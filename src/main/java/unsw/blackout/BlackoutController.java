@@ -7,7 +7,6 @@ import java.util.Map;
 
 import unsw.response.models.EntityInfoResponse;
 import unsw.utils.Angle;
-import unsw.utils.CommsHelper;
 
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 

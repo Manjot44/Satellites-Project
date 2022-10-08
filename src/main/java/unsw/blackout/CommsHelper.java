@@ -1,11 +1,8 @@
-package unsw.utils;
+package unsw.blackout;
 
 import java.util.List;
 
-import unsw.blackout.BlackoutController;
-import unsw.blackout.Device;
-import unsw.blackout.FileTransferException;
-import unsw.blackout.Satellite;
+import unsw.utils.MathsHelper;
 
 public abstract class CommsHelper {
     public static void addRecursive(BlackoutController control, List<String> inRange,
