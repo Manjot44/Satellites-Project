@@ -39,7 +39,14 @@ public class RelaySatellite extends Satellite {
     @Override
     public void move() {
         Angle position = getPosition();
-        setClockwise(checkDirection());
+        Angle leftBound = Angle.fromDegrees(140);
+        Angle rightBound = Angle.fromDegrees(190);
+
+        if (position.compareTo(rightBound) == 1) {
+            setClockwise(checkDirection());
+        } else if (position.compareTo(leftBound) == -1) {
+            setClockwise(checkDirection());
+        }
 
         double angularVelocity = getSpeed() / getHeight();
         Angle radiansMoved = Angle.fromRadians(angularVelocity);
