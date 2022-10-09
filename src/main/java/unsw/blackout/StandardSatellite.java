@@ -22,6 +22,9 @@ public class StandardSatellite extends Satellite {
         return true;
     }
 
+    /**
+     * Moves the satellite clockwise and keeps angle in bounds
+     */
     @Override
     public void move() {
         Angle position = getPosition();
@@ -31,9 +34,9 @@ public class StandardSatellite extends Satellite {
         setPosition(position.subtract(radiansMoved));
 
         Angle zeroAngle = Angle.fromDegrees(0);
-        if (position.compareTo(zeroAngle) == -1) {
+        if (getPosition().compareTo(zeroAngle) == -1) {
             Angle fullAngle = Angle.fromDegrees(360);
-            setPosition(position.add(fullAngle));
+            setPosition(getPosition().add(fullAngle));
         }
     }
 }

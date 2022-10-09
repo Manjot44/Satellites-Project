@@ -16,6 +16,9 @@ public class RelaySatellite extends Satellite {
         setClockwise(checkDirection());
     }
 
+    /**
+     * Logic for the direction of movement of the satellite (true = clockwise)
+     */
     @Override
     public boolean checkDirection() {
         Angle position = getPosition();
@@ -29,17 +32,14 @@ public class RelaySatellite extends Satellite {
         return !(position.compareTo(leftBound) == -1);
     }
 
+    /**
+     * Moves the satellite based on the direction
+     * and also keeps the angle in bounds
+     */
     @Override
     public void move() {
         Angle position = getPosition();
-        Angle leftBound = Angle.fromDegrees(140);
-        Angle rightBound = Angle.fromDegrees(190);
-
-        if (position.compareTo(rightBound) == 1) {
-            setClockwise(checkDirection());
-        } else if (position.compareTo(leftBound) == -1) {
-            setClockwise(checkDirection());
-        }
+        setClockwise(checkDirection());
 
         double angularVelocity = getSpeed() / getHeight();
         Angle radiansMoved = Angle.fromRadians(angularVelocity);
@@ -48,13 +48,13 @@ public class RelaySatellite extends Satellite {
         Angle fullAngle = Angle.fromDegrees(360);
         if (getClockwise()) {
             setPosition(position.subtract(radiansMoved));
-            if (position.compareTo(zeroAngle) == -1) {
-                setPosition(position.add(fullAngle));
+            if (getPosition().compareTo(zeroAngle) == -1) {
+                setPosition(getPosition().add(fullAngle));
             }
         } else {
             setPosition(position.add(radiansMoved));
-            if (position.compareTo(fullAngle) == 1) {
-                setPosition(position.subtract(fullAngle));
+            if (getPosition().compareTo(fullAngle) >= 0) {
+                setPosition(getPosition().subtract(fullAngle));
             }
         }
     }

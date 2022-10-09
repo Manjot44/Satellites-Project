@@ -24,6 +24,11 @@ public class TeleportingSatellite extends Satellite {
         return !getClockwise();
     }
 
+    /**
+     * Moves the satellite based on the direction while keeping angle in bounds
+     * Also checks if satellite has teleported and adjusts
+     * direction and position accordingly
+     */
     @Override
     public void move() {
         Angle position = getPosition();
@@ -36,8 +41,8 @@ public class TeleportingSatellite extends Satellite {
         Angle fullAngle = Angle.fromDegrees(360);
         if (getClockwise()) {
             setPosition(position.subtract(radiansMoved));
-            if (position.compareTo(zeroAngle) == -1) {
-                setPosition(position.add(fullAngle));
+            if (getPosition().compareTo(zeroAngle) == -1) {
+                setPosition(getPosition().add(fullAngle));
             }
             if (position.compareTo(thresholdAngle) == 1 && getPosition().compareTo(thresholdAngle) <= 0) {
                 setPosition(zeroAngle);
@@ -46,8 +51,8 @@ public class TeleportingSatellite extends Satellite {
             }
         } else {
             setPosition(position.add(radiansMoved));
-            if (position.compareTo(fullAngle) == 1) {
-                setPosition(position.subtract(fullAngle));
+            if (getPosition().compareTo(fullAngle) >= 0) {
+                setPosition(getPosition().subtract(fullAngle));
             }
             if (position.compareTo(thresholdAngle) == -1 && getPosition().compareTo(thresholdAngle) >= 0) {
                 setPosition(zeroAngle);
@@ -57,23 +62,37 @@ public class TeleportingSatellite extends Satellite {
         }
     }
 
+    /**
+     * Transfers all files based on specified teleporting behaviour
+     * (split into 4 helper functions)
+     * @param control
+     */
     public void teleTransfer(BlackoutController control) {
         for (File file : getFiles().values()) {
             String fromId = file.getFromId();
-            String toId = file.getToId();
             if (control.getDevices().containsKey(fromId)) {
                 teleFromDevice(file, control.getDevices().get(fromId));
-            } else if (control.getDevices().containsKey(toId)) {
-                teletoDevice(file, control.getDevices().get(toId));
             } else if (fromId != getSatelliteId() && control.getSatellites().containsKey(fromId)) {
                 teleFromSat(file, control.getSatellites().get(fromId));
-            } else if (toId != getSatelliteId() && control.getSatellites().containsKey(toId)) {
-                teleToSat(file, control.getSatellites().get(toId));
             }
+
+            for (String toId : file.getToIds()) {
+                if (control.getDevices().containsKey(toId)) {
+                    teletoDevice(file, control.getDevices().get(toId));
+                }  else if (control.getSatellites().containsKey(toId)) {
+                    teleToSat(file, control.getSatellites().get(toId));
+                }
+            }
+            file.getToIds().clear();
         }
         isTeleported = false;
     }
 
+    /**
+     * Applies teleporting behaviour on file transferring from device
+     * @param file
+     * @param device
+     */
     public void teleFromDevice(File file, Device device) {
         getFiles().remove(file.getFilename());
 
@@ -82,9 +101,14 @@ public class TeleportingSatellite extends Satellite {
         content = content.replace("t", "");
         fromFile.setContent(content);
         fromFile.setFullSize(content.length());
-        fromFile.setFromId(device.getDeviceId());
+        fromFile.removeToIds(getSatelliteId());
     }
 
+    /**
+     * Applies teleporting behaviour on file transferring to device
+     * @param file
+     * @param device
+     */
     public void teletoDevice(File file, Device device) {
         File toFile = device.getFile(file.getFilename());
         String content = file.getContent();
@@ -92,12 +116,16 @@ public class TeleportingSatellite extends Satellite {
         remContent = remContent.replace("t", "");
 
         toFile.setContent(toFile.getContent() + remContent);
-        toFile.setFullSize((toFile.getContent() + remContent).length());
+        toFile.setFullSize(toFile.getContent().length());
         toFile.setHasTransferCompleted(true);
         toFile.setFromId(device.getDeviceId());
-        file.setToId(getSatelliteId());
     }
 
+    /**
+     * Applies teleporting behaviour on file transferring from satellite
+     * @param file
+     * @param satellite
+     */
     public void teleFromSat(File file, Satellite satellite) {
         File fromFile = satellite.getFile(file.getFilename());
         String content = fromFile.getContent();
@@ -105,12 +133,17 @@ public class TeleportingSatellite extends Satellite {
         remContent = remContent.replace("t", "");
 
         file.setContent(file.getContent() + remContent);
-        file.setFullSize((file.getContent() + remContent).length());
+        file.setFullSize(file.getContent().length());
         file.setHasTransferCompleted(true);
         file.setFromId(getSatelliteId());
-        fromFile.setToId(satellite.getSatelliteId());
+        fromFile.removeToIds(getSatelliteId());
     }
 
+    /**
+     * Applies teleporting behaviour on file transferring to satellite
+     * @param file
+     * @param satellite
+     */
     public void teleToSat(File file, Satellite satellite) {
         File toFile = satellite.getFile(file.getFilename());
         String content = file.getContent();
@@ -118,10 +151,9 @@ public class TeleportingSatellite extends Satellite {
         remContent = remContent.replace("t", "");
 
         toFile.setContent(toFile.getContent() + remContent);
-        toFile.setFullSize((toFile.getContent() + remContent).length());
+        toFile.setFullSize(toFile.getContent().length());
         toFile.setHasTransferCompleted(true);
         toFile.setFromId(satellite.getSatelliteId());
-        file.setToId(getSatelliteId());
     }
 
     public boolean isTeleported() {

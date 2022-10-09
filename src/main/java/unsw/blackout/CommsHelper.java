@@ -4,7 +4,14 @@ import java.util.List;
 
 import unsw.utils.MathsHelper;
 
-public abstract class CommsHelper {
+public final class CommsHelper {
+    /**
+     * Adds satellites in range recursively (if a relay satellite is found)
+     * @param control
+     * @param inRange
+     * @param id
+     * @param isSenderDevice
+     */
     public static void addRecursive(BlackoutController control, List<String> inRange,
                                     String id, boolean isSenderDevice) {
         if (control.getDevices().containsKey(id)) {

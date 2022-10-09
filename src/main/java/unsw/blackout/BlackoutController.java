@@ -72,6 +72,10 @@ public class BlackoutController {
         }
     }
 
+    /**
+     * Moves satellites and then transfers files for teleporting satellites if required,
+     * then transfer for devices
+     */
     public void simulate() {
         for (Satellite satellite : satellites.values()) {
             satellite.move();
@@ -99,6 +103,12 @@ public class BlackoutController {
         }
     }
 
+    /**
+     * Adds all the appropriate devices and satellites for each entity
+     * and also removing Desktops and Standard satellites afterwards in the special cases
+     * @param id
+     * @return
+     */
     public List<String> communicableEntitiesInRange(String id) {
         List<String> inRange = new ArrayList<String>();
         boolean isSenderDevice;
@@ -108,6 +118,7 @@ public class BlackoutController {
             if (devices.get(id).getType() == "DesktopDevice") {
                 inRange.removeIf(x -> satellites.get(x) != null && satellites.get(x).getType() == "StandardSatellite");
             }
+            inRange.remove(id);
             return inRange;
         } else {
             isSenderDevice = false;
@@ -115,10 +126,14 @@ public class BlackoutController {
             if (satellites.get(id).getType() == "StandardSatellite") {
                 inRange.removeIf(x -> (devices.get(x) != null) && (devices.get(x).getType() == "DesktopDevice"));
             }
+            inRange.remove(id);
             return inRange;
         }
     }
 
+    /**
+     * Separates the 3 cases of file sending then uses helper functions to send
+     */
     public void sendFile(String fileName, String fromId, String toId) throws FileTransferException {
         if (devices.containsKey(fromId)) {
             CommsHelper.devToSatSend(fileName, devices.get(fromId), satellites.get(toId));

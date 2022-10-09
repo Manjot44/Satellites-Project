@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
 import java.util.Arrays;
@@ -108,11 +109,6 @@ public class Task2ExampleTests {
 
         controller.simulate(msg.length());
         assertEquals(new FileInfoResponse("FileAlpha", msg, msg.length(), true), controller.getInfo("DeviceB").getFiles().get("FileAlpha"));
-
-        // Hints for further testing:
-        // - What about checking about the progress of the message half way through?
-        // - Device/s get out of range of satellite
-        // ... and so on.
     }
 
     @Test
@@ -181,5 +177,126 @@ public class Task2ExampleTests {
 
         // Verify that Satellite1 is now at theta=0
         assertTrue(controller.getInfo("Satellite1").getPosition().toDegrees() % 360 == 0);
+
+        // Verify that the satellite is now going clockwise
+        controller.simulate();
+        clockwiseOnFirstMovement = controller.getInfo("Satellite1").getPosition();
+        controller.simulate();
+        clockwiseOnSecondMovement = controller.getInfo("Satellite1").getPosition();
+        assertTrue(clockwiseOnSecondMovement.compareTo(clockwiseOnFirstMovement) == -1);
+    }
+
+    @Test
+    public void testrelayPositive() {
+        BlackoutController controller = new BlackoutController();
+        controller.createSatellite("Satellite1", "RelaySatellite", 100 + RADIUS_OF_JUPITER,
+                                Angle.fromDegrees(345));
+
+        // checks if satellites initial movement is positive
+        Angle initial = Angle.fromDegrees(345);
+        controller.simulate();
+        Angle next = controller.getInfo("Satellite1").getPosition();
+        assertTrue(next.compareTo(initial) == 1);
+
+        // checks if satellite turns back at 190 degrees
+        controller.simulate(166);
+        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(190), 100 + RADIUS_OF_JUPITER,
+                        "RelaySatellite"), controller.getInfo("Satellite1"));
+
+        controller.simulate();
+        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(188.78), 100 + RADIUS_OF_JUPITER,
+                        "RelaySatellite"), controller.getInfo("Satellite1"));
+    }
+
+    @Test
+    public void testRelayNegative() {
+        BlackoutController controller = new BlackoutController();
+        controller.createSatellite("Satellite1", "RelaySatellite", 100 + RADIUS_OF_JUPITER,
+                                Angle.fromDegrees(344));
+
+        // checks if satellites initial movement is positive
+        Angle initial = Angle.fromDegrees(344);
+        controller.simulate();
+        Angle next = controller.getInfo("Satellite1").getPosition();
+        assertTrue(next.compareTo(initial) == -1);
+    }
+
+    @Test
+    public void testDeviceCompatibilityOnly() {
+        BlackoutController controller = new BlackoutController();
+
+        controller.createSatellite("Satellite1", "StandardSatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(320));
+        controller.createSatellite("Satellite2", "TeleportingSatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(315));
+        controller.createSatellite("Satellite3", "RelaySatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(310));
+        controller.createDevice("DeviceA", "LaptopDevice", Angle.fromDegrees(320));
+        controller.createDevice("DeviceB", "HandheldDevice", Angle.fromDegrees(315));
+        controller.createDevice("DeviceC", "DesktopDevice", Angle.fromDegrees(310));
+
+        // testing that desktops and standard satellites can't communicate
+        assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite3", "DeviceA", "DeviceB"), controller.communicableEntitiesInRange("Satellite1"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite3"), controller.communicableEntitiesInRange("DeviceC"));
+    }
+
+    @Test
+    public void testInRangeRelay() {
+        BlackoutController controller = new BlackoutController();
+
+        controller.createDevice("DeviceA", "LaptopDevice", Angle.fromDegrees(150));
+        controller.createSatellite("Satellite1", "StandardSatellite", 500 + RADIUS_OF_JUPITER, Angle.fromDegrees(60));
+        assertListAreEqualIgnoringOrder(Arrays.asList(), controller.communicableEntitiesInRange("DeviceA"));
+
+        // creating chain of relays to communicate with satellite
+        controller.createSatellite("Satellite2", "RelaySatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(125));
+        assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2"), controller.communicableEntitiesInRange("DeviceA"));
+
+        controller.createSatellite("Satellite3", "RelaySatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(90));
+        assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite3", "Satellite1"), controller.communicableEntitiesInRange("DeviceA"));
+    }
+
+    @Test
+    public void testRelayDeviceCompatibility() {
+        BlackoutController controller = new BlackoutController();
+
+        controller.createDevice("DeviceA", "DesktopDevice", Angle.fromDegrees(150));
+        controller.createSatellite("Satellite1", "StandardSatellite", 500 + RADIUS_OF_JUPITER, Angle.fromDegrees(60));
+
+        // creating chain of relays and seeing that the desktop and the standard satellite still won't communicate
+        controller.createSatellite("Satellite2", "RelaySatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(125));
+        controller.createSatellite("Satellite3", "RelaySatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(90));
+        assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite3"), controller.communicableEntitiesInRange("DeviceA"));
+        assertListAreEqualIgnoringOrder(Arrays.asList("Satellite2", "Satellite3"), controller.communicableEntitiesInRange("Satellite1"));
+    }
+
+    @Test
+    public void testOutOfRangeMidTransfer() {
+        BlackoutController controller = new BlackoutController();
+
+        controller.createDevice("DeviceA", "DesktopDevice", Angle.fromDegrees(150));
+        controller.createSatellite("Satellite1", "StandardSatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(130));
+
+        // sending file and simulating til out of range
+        String msg = "Hello StandardSatellite";
+        controller.addFileToDevice("DeviceA", "File1", msg);
+        assertDoesNotThrow(() -> controller.sendFile("File1", "DeviceA", "Satellite1"));
+
+        controller.simulate(10);
+        assertFalse(controller.getInfo("Satellite1").getFiles().containsKey("File1"));
+    }
+
+    @Test
+    public void testDeleteMidTransfer() {
+        BlackoutController controller = new BlackoutController();
+
+        controller.createDevice("DeviceA", "DesktopDevice", Angle.fromDegrees(150));
+        controller.createSatellite("Satellite1", "StandardSatellite", 10000 + RADIUS_OF_JUPITER, Angle.fromDegrees(130));
+
+        // sending file and simulating til out of range
+        String msg = "Hello StandardSatellite";
+        controller.addFileToDevice("DeviceA", "File1", msg);
+        assertDoesNotThrow(() -> controller.sendFile("File1", "DeviceA", "Satellite1"));
+
+        controller.simulate(1);
+        controller.removeSatellite("Satellite1");
+        controller.simulate(10);
     }
 }

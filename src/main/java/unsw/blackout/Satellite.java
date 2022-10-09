@@ -1,5 +1,6 @@
 package unsw.blackout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,43 +47,65 @@ public abstract class Satellite {
         return fileResponse;
     }
 
+    /**
+     * Transfers all the files queued to be sent in one tick
+     * if entity is still in range
+     * @param control
+     */
     public void transfer(BlackoutController control) {
         for (File file : files.values()) {
-            if (file.getToId() == satelliteId) continue;
+            List<String> removeToIds = new ArrayList<String>();
+            for (String toId : file.getToIds()) {
+                handleTransfer(control, file, toId, removeToIds);
+            }
+            file.getToIds().removeAll(removeToIds);
+        }
+    }
 
-            List<String> entities = control.communicableEntitiesInRange(satelliteId);
-            String toId = file.getToId();
-
-            if (control.getDevices().containsKey(toId)) {
-                Device dev = control.getDevices().get(toId);
-                if (!entities.contains(toId)) {
-                    file.setToId(satelliteId);
-                    if (dev != null) {
-                        dev.removeFile(file.getFilename());
-                    }
-                } else {
-                    sendBytesToDev(dev, file);
+    /**
+     * Handles the transfer based on whether it is to a device or satellite
+     * @param control
+     * @param file
+     * @param toId
+     * @param removeToIds
+     */
+    public void handleTransfer(BlackoutController control, File file, String toId, List<String> removeToIds) {
+        List<String> entities = control.communicableEntitiesInRange(satelliteId);
+        if (control.getDevices().containsKey(toId)) {
+            Device dev = control.getDevices().get(toId);
+            if (!entities.contains(toId)) {
+                removeToIds.add(toId);
+                if (dev != null) {
+                    dev.removeFile(file.getFilename());
                 }
             } else {
-                Satellite sat = control.getSatellites().get(toId);
-                if (!entities.contains(toId)) {
-                    file.setToId(satelliteId);
-                    if (sat != null) {
-                        sat.removeFile(file.getFilename());
-                    }
-                } else {
-                    sendBytesToSat(sat, file);
+                sendBytesToDev(dev, file, removeToIds);
+            }
+        } else {
+            Satellite sat = control.getSatellites().get(toId);
+            if (!entities.contains(toId)) {
+                removeToIds.add(toId);
+                if (sat != null) {
+                    sat.removeFile(file.getFilename());
                 }
+            } else {
+                sendBytesToSat(sat, file, removeToIds);
             }
         }
     }
 
-    public void sendBytesToSat(Satellite sat, File file) {
+    /**
+     * Sends the number of bytes throttling to the minimum send/receive speed
+     * @param sat
+     * @param file
+     * @param removeToIds
+     */
+    public void sendBytesToSat(Satellite sat, File file, List<String> removeToIds) {
         int speed;
         if (sat.getRecSpeed() <= sendBandwidth / this.numSend()) {
             speed = sat.getRecSpeed();
         } else {
-            speed = this.numReceive() / sendBandwidth;
+            speed = sendBandwidth / this.numSend();
         }
 
         File toFile = sat.getFile(file.getFilename());
@@ -90,7 +113,7 @@ public abstract class Satellite {
             toFile.setContent(file.getContent());
             toFile.setHasTransferCompleted(true);
             toFile.setFromId(sat.getSatelliteId());
-            file.setToId(satelliteId);
+            removeToIds.add(sat.getSatelliteId());
         } else {
             int newLength = toFile.getCurrentSize() + speed;
             String content = file.getContent();
@@ -98,14 +121,20 @@ public abstract class Satellite {
         }
     }
 
-    public void sendBytesToDev(Device dev, File file) {
+    /**
+     * Sends the number of bytes depending on the send speed of the satellite
+     * @param dev
+     * @param file
+     * @param removeToIds
+     */
+    public void sendBytesToDev(Device dev, File file, List<String> removeToIds) {
         int speed = sendBandwidth / numSend();
         File toFile = dev.getFile(file.getFilename());
         if (file.getFullSize() - toFile.getCurrentSize() <= speed) {
             toFile.setContent(file.getContent());
             toFile.setHasTransferCompleted(true);
             toFile.setFromId(dev.getDeviceId());
-            file.setToId(satelliteId);
+            removeToIds.add(dev.getDeviceId());
         } else {
             int newLength = toFile.getCurrentSize() + speed;
             String content = file.getContent();
@@ -116,19 +145,23 @@ public abstract class Satellite {
     public void receiveFile(String filename, int fullSize, String fromId) {
         String content = "";
         boolean hasTransferCompleted = false;
-        String toId = satelliteId;
-        File file = new File(filename, content, fullSize, hasTransferCompleted, fromId, toId);
+        File file = new File(filename, content, fullSize, hasTransferCompleted, fromId);
         files.put(filename, file);
     }
 
     public void sendFile(String filename, String toId) {
-        files.get(filename).setToId(toId);
+        files.get(filename).addToIds(toId);
     }
 
     public void removeFile(String filename) {
         files.remove(filename);
     }
 
+    /**
+     * Returns the number of bytes if the full file exists, otherwise -1
+     * @param filename
+     * @return
+     */
     public int fullFileExists(String filename) {
         if (files.containsKey(filename) && files.get(filename).isHasTransferCompleted()) {
             return files.get(filename).getFullSize();
@@ -162,9 +195,7 @@ public abstract class Satellite {
     public int numSend() {
         int numSend = 0;
         for (File file : files.values()) {
-            if (file.getToId() != satelliteId) {
-                numSend++;
-            }
+            numSend += file.getToIds().size();
         }
         return numSend;
     }
