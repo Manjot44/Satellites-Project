@@ -68,12 +68,6 @@ $ open build/reports/tests/test/index.html   # Example for macOS
 ```
 
 ---
-## 📝 Code Quality
-* **Checkstyle** enforced via `checkstyle.xml` → `./gradlew check`
-* Java 11 source-compatibility (`build.gradle`)
-* Uses **Gson** for JSON serialization and **SparkJava** for the embedded HTTP server.
-
----
 ## 📄 Design Notes
 A detailed UML class diagram describing the system architecture is available in the included **design.pdf** file.  
 
