@@ -61,7 +61,7 @@ JUnit 5 tests validate orbital maths, connectivity rules, and file-transfer edge
 
 ```bash
 # Execute the full test-suite
-$ ./gradlew test
+$ gradle test
 
 # View the HTML report (build/reports/tests/test/index.html)
 $ open build/reports/tests/test/index.html   # Example for macOS
